@@ -1,0 +1,19 @@
+name: aegis-attestation
+version: 0.2.1
+author: nnnet/AiManager
+repo: https://github.com/nnnet/hermes-plugin-aegis-attestation
+description: |
+  Tier-A deterministic kanban-deliverable attestation with HYBRID trigger:
+   - ``post_tool_call`` hook on ``kanban_block(reason='review-required:...')``
+     → instant attestation (millisecond latency, same agent turn)
+   - ``hermes aegis tick`` CLI for cron / systemd / Hermes-internal cron job
+     → catch-up safety net for tasks the hook missed (worker crash, CLI
+       block, dispatcher cleanup, etc.)
+  Verifies declared deliverables exist + hashes them with sha256, posts a
+  signed (HMAC) attestation comment, and optionally auto-unblocks on pass.
+  No LLM, no network, stdlib-only.
+author: "Hermes / nnnet fork"
+kind: standalone
+provides_hooks:
+  - post_tool_call    # instant trigger on kanban_block(review-required:)
+provides_tools: []

@@ -1,0 +1,30 @@
+# systemd-user timer — drives aegis-tick.service on a schedule.
+#
+# Why:
+#   The post_tool_call hook gives us instant attestation for ~99% of
+#   handoffs. The remaining 1% (Web UI / CLI / dispatcher block) need a
+#   polling catch-up. 5-minute interval is plenty (handoff-to-attest
+#   latency in that 1% case = up to 5 minutes, which is fine because the
+#   alternative would be never).
+#
+# What:
+#   Fires aegis-tick.service every 5 minutes. Persistent=true means a
+#   missed tick (host suspended, timer disabled, etc.) is replayed once
+#   on resume — so we don't accumulate unattested tasks across reboots.
+#
+# Tunable:
+#   - OnUnitActiveSec=5min  — change to 1min for tighter SLO, or 15min
+#     for lower overhead. Hook makes anything in this range acceptable.
+
+[Unit]
+Description=Aegis attestation tick — every 5 minutes (catch-up safety net)
+
+[Timer]
+OnBootSec=2min
+OnUnitActiveSec=5min
+AccuracySec=30s
+Persistent=true
+Unit=aegis-tick.service
+
+[Install]
+WantedBy=timers.target

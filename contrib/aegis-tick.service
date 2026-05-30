@@ -1,0 +1,39 @@
+# systemd-user service for the Aegis attestation catch-up tick.
+#
+# Why:
+#   With aegis-attestation v0.2.0 the post_tool_call hook handles 99% of
+#   review-required handoffs instantly. This service exists as a catch-up
+#   safety net for the remaining 1% where kanban_block was called outside
+#   the agent process (Web UI, hermes CLI, dispatcher cleanup, etc.).
+#
+# What:
+#   Oneshot wrapper invocation around `hermes aegis tick`. Paired with
+#   aegis-tick.timer for periodic activation. Log goes to ~/.hermes/logs/aegis.log
+#   (the wrapper script handles the append).
+#
+# Install:
+#   mkdir -p ~/.config/systemd/user
+#   cp aegis-tick.service ~/.config/systemd/user/
+#   cp aegis-tick.timer   ~/.config/systemd/user/
+#   chmod +x /path/to/contrib/aegis-tick.sh
+#   # Edit ExecStart below to point at the absolute path of aegis-tick.sh
+#   systemctl --user daemon-reload
+#   systemctl --user enable --now aegis-tick.timer
+#
+# Verify:
+#   systemctl --user list-timers | grep aegis
+#   journalctl --user -u aegis-tick.service -n 20
+
+[Unit]
+Description=Aegis attestation catch-up tick (safety net for instant hook)
+Documentation=file:///mnt/9/aimanager/sources/hermes-agent/plugins/aegis_attestation/README.md
+
+[Service]
+Type=oneshot
+# IMPORTANT: replace this absolute path with where you cloned hermes-agent.
+ExecStart=/mnt/9/aimanager/sources/hermes-agent/plugins/aegis_attestation/contrib/aegis-tick.sh
+# Keep logs out of the journal — wrapper writes to ~/.hermes/logs/aegis.log.
+StandardOutput=null
+StandardError=null
+# Defensive timeout — a tick over a 50-task board takes <1s on a hot DB.
+TimeoutStartSec=120

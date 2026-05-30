@@ -1,0 +1,9 @@
+{
+  "name": "aegis-attestation",
+  "version": "0.1.0",
+  "description": "Tier-A deterministic kanban-deliverable attestation (no LLM).",
+  "author": "Hermes / nnnet fork",
+  "license": "Apache-2.0",
+  "entry": "__init__.py",
+  "note": "Hermes plugin loader reads plugin.yaml, not this file. Kept for cross-tool interop and as the canonical JSON descriptor for downstream packagers."
+}
