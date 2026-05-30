@@ -560,3 +560,18 @@ def register(ctx: Any) -> None:
             "aegis-attestation: failed to register post_tool_call hook (%s); "
             "falling back to cron-only mode", exc,
         )
+
+    # --- 3. aegis_review MCP tool ---
+    # The ``aegis_review`` tool gives workers a programmatic surface for
+    # Tier-B LLM review (was previously tools/aegis_review_tool.py in the
+    # fork). Importing the module triggers its top-level
+    # registry.register() call as a side effect.
+    try:
+        from . import aegis_review_tool  # noqa: F401 — module side-effect
+        logger.debug("aegis-attestation: registered aegis_review MCP tool")
+    except Exception as exc:
+        logger.warning(
+            "aegis-attestation: aegis_review tool registration failed (%s); "
+            "CLI + hook still work, but workers can't self-review",
+            exc,
+        )
